@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Store QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 0.6rem;
+      margin: 0.5rem;
+    }
+    img {
+      margin-top: 1.5rem;
+      max-width: 280px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Generate Store QR</h2>
+
+  <input
+    type="password"
+    id="key"
+    placeholder="Admin key"
+  />
+  <br />
+  <button onclick="loadQR()">Generate QR</button>
+
+  <div>
+    <img id="qr" />
+  </div>
+
+  <script>
+    async function loadQR() {
+      const key = document.getElementById("key").value;
+      const res = await fetch(`/api/admin/qr?key=${encodeURIComponent(key)}`);
+      if (!res.ok) {
+        alert("Invalid admin key");
+        return;
+      }
+      const data = await res.json();
+      document.getElementById("qr").src = data.qr_data_url;
+    }
+  </script>
+
+</body>
+</html>
