@@ -91,3 +91,70 @@ app.post("/api/scan", async (req, res) => {
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
+
+app.get("/scan", async (req, res) => {
+  const d = req.query.d;
+  if (!d) return res.status(400).send("Missing d");
+
+  // d is base64url of "STORE_ID|timestamp|sig"
+  let payload;
+  try {
+    payload = Buffer.from(d, "base64url").toString("utf8");
+  } catch {
+    return res.status(400).send("Bad d");
+  }
+
+  const [storeId, ts, sig] = payload.split("|");
+  if (!storeId || !ts || !sig) return res.status(400).send("Bad payload");
+
+  const base = `${storeId}|${ts}`;
+  if (hmac(base) !== sig) return res.status(401).send("Invalid QR");
+
+  // Customer id stored in cookie so same phone keeps progress
+  const cookieName = "cid";
+  const cookieHeader = req.headers.cookie || "";
+  const match = cookieHeader.match(/(?:^|;\s*)cid=([^;]+)/);
+  let cid = match ? decodeURIComponent(match[1]) : crypto.randomUUID();
+
+  // If new, set cookie (1 year)
+  if (!match) {
+    res.setHeader(
+      "Set-Cookie",
+      `${cookieName}=${encodeURIComponent(cid)}; Path=/; Max-Age=31536000; SameSite=Lax`
+    );
+  }
+
+  const customer = await getOrCreateCustomer(cid);
+
+  // 10-minute rate limit
+  const last = customer.last_scan_at ? new Date(customer.last_scan_at).getTime() : 0;
+  if (Date.now() - last < 10 * 60 * 1000) {
+    return res.status(429).send("Too soon — try again in a few minutes.");
+  }
+
+  // Loyalty logic
+  let { stamp_count, free_available } = customer;
+  if (stamp_count >= 5) {
+    stamp_count = 0;
+    free_available += 1;
+  } else {
+    stamp_count += 1;
+  }
+
+  await pool.query(
+    `UPDATE customers
+     SET stamp_count=$1, free_available=$2, last_scan_at=now()
+     WHERE id=$3`,
+    [stamp_count, free_available, cid]
+  );
+
+  await pool.query(
+    "INSERT INTO scans (customer_id, store_id) VALUES ($1,$2)",
+    [cid, storeId]
+  );
+
+  // Simple success page
+  res.send(`
+    <html><body style="font-family:system-ui;padding:24px">
+      <h2>✅ Stamp added</h2>
+      <p>Stamps: <
