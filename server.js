@@ -178,6 +178,10 @@ app.get("/api/me", async (req, res) => {
   res.json({ customer });
 });
 
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
