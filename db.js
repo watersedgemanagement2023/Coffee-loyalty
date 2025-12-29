@@ -21,6 +21,14 @@ export async function initDb() {
       store_id TEXT NOT NULL,
       scanned_at TIMESTAMPTZ DEFAULT now()
     );
+
+    await pool.query(`
+  CREATE TABLE IF NOT EXISTS redemptions (
+    id bigserial PRIMARY KEY,
+    customer_id text NOT NULL,
+    store_id text NOT NULL,
+    redeemed_at timestamptz NOT NULL DEFAULT now()
+  );
   `);
 }
 
