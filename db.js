@@ -24,12 +24,12 @@ export async function initDb() {
 
     await pool.query(`
   CREATE TABLE IF NOT EXISTS redemptions (
-    id bigserial PRIMARY KEY,
-    customer_id text NOT NULL,
-    store_id text NOT NULL,
-    redeemed_at timestamptz NOT NULL DEFAULT now()
-  );
-  `);
+    id SERIAL PRIMARY KEY,
+    customer_id TEXT NOT NULL,
+    store_id TEXT NOT NULL,
+    redeemed_at TIMESTAMPZ DEFAULT now()
+`);
+
 }
 
 export async function getOrCreateCustomer(id) {
