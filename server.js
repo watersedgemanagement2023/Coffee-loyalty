@@ -39,8 +39,10 @@ app.get("/api/admin/qr", async (req, res) => {
   // URL-safe encoded payload
   const d = Buffer.from(`${base}|${sig}`, "utf8").toString("base64url");
 
-  const url = `https://${req.get("host")}/scan?d=${d}`;
-  const qr = await QRCode.toDataURL(url, { scale: 8 });
+  const baseUrl = process.env.PUBLIC_BASE_URL || "https://coffee-loyalty.onrender.com";
+  const url = `${baseUrl}/scan?d=${encodeURIComponent(d)}`;
+  console.log("QR URL:", url);
+
 
   res.json({ store_id: STORE_ID, url, qr_data_url: qr });
 });
