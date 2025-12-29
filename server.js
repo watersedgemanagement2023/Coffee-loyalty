@@ -33,10 +33,15 @@ app.get("/api/admin/qr", async (req, res) => {
   const ts = Date.now().toString();
   const base = `${STORE_ID}|${ts}`;
   const sig = hmac(base);
-  const payload = `${base}|${sig}`;
 
-  const qr = await QRCode.toDataURL(payload, { scale: 8 });
-  res.json({ store_id: STORE_ID, qr_data_url: qr });
+  // Encode as base64url so it’s URL-safe
+  const d = Buffer.from(`${base}|${sig}`, "utf8").toString("base64url");
+
+  const url = `https://${req.get("host")}/scan?d=${d}`;
+  const qr = await QRCode.toDataURL(url, { scale: 8 });
+
+  res.json({ store_id: STORE_ID, url, qr_data_url: qr });
+});
 });
 
 // Customer status
