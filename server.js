@@ -66,14 +66,33 @@ app.get("/api/customer/:id", async (req, res) => {
  * Camera-scan endpoint: customer scans QR -> browser opens -> stamp added
  */
 app.get("/scan", async (req, res) => {
-  const d = req.query.d;
-  if (!d) return res.status(400).send("Missing d");
-
-  let payload;
   try {
-    payload = Buffer.from(d, "base64url").toString("utf8");
-  } catch {
-    return res.status(400).send("Bad d");
+    const d = req.query.d;
+    if (!d) return res.status(400).send("bad payload");
+
+    // IMPORTANT: decode base64url (matches toString("base64url"))
+    const decoded = Buffer.from(d, "base64url").toString("utf8");
+
+    const parts = decoded.split("|");
+    if (parts.length !== 3) return res.status(400).send("bad payload");
+
+    const [storeId, ts, sig] = parts;
+
+    const base = `${storeId}|${ts}`;
+    const expected = hmac(base);
+
+    if (sig !== expected) return res.status(400).send("bad payload");
+
+    // ✅ payload is valid from here
+    // TODO: your scan/stamp logic here (getOrCreateCustomer etc)
+
+    return res.send("OK"); // temporary so we can confirm it works
+  } catch (err) {
+    console.error("scan error:", err);
+    return res.status(400).send("bad payload");
+  }
+});
+
   }
 
   const [storeId, ts, sig] = payload.split("|");
