@@ -199,9 +199,9 @@ app.post("/api/scan", async (req, res) => {
     [customer_id, storeId]
   );
 
-  const updated = await getOrCreateCustomer(customer_id);
+ const updated = await getOrCreateCustomer(customer_id);
   res.json({ customer: updated });
-});
+}); 
 
 // Customer "me" (cookie-based) status
 app.get("/api/me", async (req, res) => {
