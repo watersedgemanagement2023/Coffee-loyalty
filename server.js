@@ -67,29 +67,46 @@ app.get("/api/customer/:id", async (req, res) => {
  */
 app.get("/scan", async (req, res) => {
   try {
-    const d = req.query.d;
+    let d = req.query.d;
     if (!d) return res.status(400).send("bad payload");
 
-    // IMPORTANT: decode base64url (matches toString("base64url"))
-    const decoded = Buffer.from(d, "base64url").toString("utf8");
+    // Some scanners may URL-decode/alter characters; normalize just in case
+    d = String(d).trim();
+
+    // Decode base64url (must match toString("base64url") in /api/admin/qr)
+    let decoded;
+    try {
+      decoded = Buffer.from(d, "base64url").toString("utf8");
+    } catch {
+      return res.status(400).send("bad payload");
+    }
 
     const parts = decoded.split("|");
     if (parts.length !== 3) return res.status(400).send("bad payload");
 
     const [storeId, ts, sig] = parts;
 
+    // Basic timestamp sanity (optional but recommended)
+    if (!/^\d+$/.test(ts)) return res.status(400).send("bad payload");
+    const ageMs = Date.now() - Number(ts);
+    if (ageMs < -5 * 60 * 1000 || ageMs > 24 * 60 * 60 * 1000) {
+      // older than 24h or more than 5 min in the future
+      return res.status(400).send("bad payload");
+    }
+
     const base = `${storeId}|${ts}`;
     const expected = hmac(base);
 
     if (sig !== expected) return res.status(400).send("bad payload");
 
-    // ✅ payload is valid from here
-    // TODO: your scan/stamp logic here (getOrCreateCustomer etc)
-
-    return res.send("OK"); // temporary so we can confirm it works
+    // ✅ payload is valid
+    return res.send("OK"); // temporary
   } catch (err) {
     console.error("scan error:", err);
     return res.status(400).send("bad payload");
+  }
+});
+
   }
 });
 
