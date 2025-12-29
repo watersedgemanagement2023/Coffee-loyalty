@@ -116,15 +116,48 @@ app.get("/scan", async (req, res) => {
   );
 
   res.send(`
-    <html>
-      <body style="font-family:system-ui;padding:24px">
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Stamp added</title>
+      <style>
+        body { font-family: system-ui; padding: 24px; background:#fafafa; }
+        .card {
+          max-width:520px;
+          margin:0 auto;
+          background:#fff;
+          padding:20px;
+          border-radius:16px;
+          box-shadow:0 6px 24px rgba(0,0,0,.08);
+        }
+        a {
+          display:block;
+          text-align:center;
+          margin-top:16px;
+          padding:14px;
+          border-radius:12px;
+          background:#111;
+          color:#fff;
+          text-decoration:none;
+          font-weight:600;
+        }
+        .muted { opacity:.7; margin-top:10px; font-size:13px; text-align:center; }
+      </style>
+      <script>
+        setTimeout(() => { window.location.href = "/"; }, 2000);
+      </script>
+    </head>
+    <body>
+      <div class="card">
         <h2>✅ Stamp added</h2>
         <p>Stamps: <b>${stamp_count}</b>/5</p>
         <p>Free drinks available: <b>${free_available}</b></p>
-        <p style="opacity:.7">You can close this tab.</p>
-      </body>
-    </html>
-  `);
+        <a href="/">Back to Loyalty</a>
+        <div class="muted">Redirecting…</div>
+      </div>
+    </body>
+  </html>
+`);
 });
 
 /**
