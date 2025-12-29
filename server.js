@@ -75,6 +75,7 @@ app.get("/scan", async (req, res) => {
     if (parts.length !== 3) return res.status(400).send("bad payload");
 
     const [storeId, ts, sig] = parts;
+
     const base = `${storeId}|${ts}`;
     const expected = hmac(base);
 
@@ -82,21 +83,6 @@ app.get("/scan", async (req, res) => {
 
     // ✅ payload verified
     return res.send("OK");
-  } catch (err) {
-    console.error("scan error:", err);
-    return res.status(400).send("bad payload");
-  }
-});
-
-    }
-
-    const base = `${storeId}|${ts}`;
-    const expected = hmac(base);
-
-    if (sig !== expected) return res.status(400).send("bad payload");
-
-    // ✅ payload is valid
-    return res.send("OK"); // temporary
   } catch (err) {
     console.error("scan error:", err);
     return res.status(400).send("bad payload");
