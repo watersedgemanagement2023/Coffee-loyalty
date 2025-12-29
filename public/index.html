@@ -24,7 +24,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>☕ Coffee Loyalty</h1>
+    <h1>☕ Waters Edge Coffee Loyalty</h1>
     <p>Buy a drink → ask staff to show the <b>Store QR</b> → scan it with your camera to add a stamp.</p>
 
     <div class="row">
@@ -106,9 +106,9 @@
       renderStamps(c.stamp_count);
 
       // Show redeem button only when free drinks available
-      const btn = document.getElementById("redeemBtn");
-      btn.style.display = c.free_available > 0 ? "block" : "none";
-      btn.onclick = redeem;
+const redeemBtn = document.getElementById("redeemBtn");
+redeemBtn.style.display = c.free_available > 0 ? "block" : "none";
+redeemBtn.onclick = redeem;
 
       msg.style.display = "block";
       msg.textContent = "Status updated.";
