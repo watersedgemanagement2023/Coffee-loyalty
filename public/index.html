@@ -62,6 +62,7 @@
         d.className = "dot" + (i <= n ? " filled" : "");
         d.textContent = i <= n ? "✓" : "";
         wrap.appendChild(d);
+        document.getElementById("redeemBtn").onclick = redeem;
       }
     }
 
