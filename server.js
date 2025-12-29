@@ -69,9 +69,14 @@ app.get("/scan", async (req, res) => {
   try {
     const d = req.query.d;
     if (!d) {
-      console.log("[scan] missing d");
-      return res.status(400).send("bad payload");
-    }
+  return res.status(400).send(`
+    <html><body style="font-family:system-ui;padding:24px">
+      <h2>Missing QR data</h2>
+      <p>Please scan the shop QR code again.</p>
+    </body></html>
+  `);
+}
+
 
     console.log("[scan] app_secret set:", !!APP_SECRET);
     console.log("[scan] d length:", String(d).length);
