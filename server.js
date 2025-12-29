@@ -68,31 +68,46 @@ app.get("/api/customer/:id", async (req, res) => {
 app.get("/scan", async (req, res) => {
   try {
     const d = req.query.d;
-    if (!d) return res.status(400).send("bad payload");
+    if (!d) {
+      console.log("[scan] missing d");
+      return res.status(400).send("bad payload");
+    }
 
     console.log("[scan] app_secret set:", !!APP_SECRET);
     console.log("[scan] d length:", String(d).length);
 
-    const decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
+    let decoded;
+    try {
+      decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
+    } catch (e) {
+      console.log("[scan] decode failed:", e?.message);
+      return res.status(400).send("bad payload");
+    }
+
     const parts = decoded.split("|");
-    if (parts.length !== 3) return res.status(400).send("bad payload");
+    console.log("[scan] parts:", parts.length);
+
+    if (parts.length !== 3) {
+      console.log("[scan] decoded preview:", decoded.slice(0, 120));
+      return res.status(400).send("bad payload");
+    }
 
     const [storeId, ts, sig] = parts;
 
     const base = `${storeId}|${ts}`;
     const expected = hmac(base);
 
-    console.log("[scan] sig match:", sig === expected);
+    const ok = sig === expected;
+    console.log("[scan] sig match:", ok);
 
-    if (sig !== expected) return res.status(400).send("bad payload");
+    if (!ok) return res.status(401).send("invalid signature");
 
     return res.send("OK");
   } catch (err) {
-    console.error("scan error:", err);
+    console.error("[scan] exception:", err);
     return res.status(400).send("bad payload");
   }
 });
-
 
 /**
  * (Optional) keep POST /api/scan if you want a future in-app scanner.
