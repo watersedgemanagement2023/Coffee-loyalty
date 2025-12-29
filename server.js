@@ -226,6 +226,45 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+const REDEEM_PIN = process.env.REDEEM_PIN;
+
+// Redeem a free drink (requires staff PIN)
+app.post("/api/redeem", async (req, res) => {
+  const { pin } = req.body;
+  if (!REDEEM_PIN) return res.status(500).json({ error: "redeem_pin_not_set" });
+  if (pin !== REDEEM_PIN) return res.status(403).json({ error: "bad_pin" });
+
+  // Get customer id from cookie (same as /api/me)
+  const cookieHeader = req.headers.cookie || "";
+  const match = cookieHeader.match(/(?:^|;\s*)cid=([^;]+)/);
+  if (!match) return res.status(400).json({ error: "no_customer_cookie" });
+
+  const cid = decodeURIComponent(match[1]);
+  const customer = await getOrCreateCustomer(cid);
+
+  if (customer.free_available <= 0) {
+    return res.status(400).json({ error: "no_free_drinks" });
+  }
+
+  const newFree = customer.free_available - 1;
+
+  await pool.query(
+    `UPDATE customers
+     SET free_available=$1
+     WHERE id=$2`,
+    [newFree, cid]
+  );
+
+  await pool.query(
+    `INSERT INTO redemptions (customer_id, store_id)
+     VALUES ($1, $2)`,
+    [cid, STORE_ID]
+  );
+
+  const updated = await getOrCreateCustomer(cid);
+  res.json({ customer: updated });
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
