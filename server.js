@@ -70,6 +70,9 @@ app.get("/scan", async (req, res) => {
     const d = req.query.d;
     if (!d) return res.status(400).send("bad payload");
 
+    console.log("[scan] app_secret set:", !!APP_SECRET);
+    console.log("[scan] d length:", String(d).length);
+
     const decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
     const parts = decoded.split("|");
     if (parts.length !== 3) return res.status(400).send("bad payload");
@@ -79,6 +82,8 @@ app.get("/scan", async (req, res) => {
     const base = `${storeId}|${ts}`;
     const expected = hmac(base);
 
+    console.log("[scan] sig match:", sig === expected);
+
     if (sig !== expected) return res.status(400).send("bad payload");
 
     return res.send("OK");
@@ -86,8 +91,8 @@ app.get("/scan", async (req, res) => {
     console.error("scan error:", err);
     return res.status(400).send("bad payload");
   }
-
 });
+
 
 /**
  * (Optional) keep POST /api/scan if you want a future in-app scanner.
