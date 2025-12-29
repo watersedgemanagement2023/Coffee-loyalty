@@ -68,53 +68,105 @@ app.get("/api/customer/:id", async (req, res) => {
 app.get("/scan/:d", async (req, res) => {
   try {
     const d = req.params.d;
-
     if (!d) {
-      return res.status(400).send(`
-        <html><body style="font-family:system-ui;padding:24px">
-          <h2>Scan Failed</h2>
-          <p>Please scan the QR code again.</p>
-          <p>The Team at Waters Edge thanks you.</p>
-        </body></html>
+      return res.status(400).send("Scan failed");
+    }
+
+    // Decode + verify QR
+    const decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
+    const parts = decoded.split("|");
+    if (parts.length !== 3) return res.status(400).send("Bad payload");
+
+    const [storeId, ts, sig] = parts;
+    const base = `${storeId}|${ts}`;
+    if (hmac(base) !== sig) return res.status(401).send("Invalid QR");
+
+    // ---- CUSTOMER IDENTIFICATION (cookie-based) ----
+    const cookieName = "cid";
+    const cookieHeader = req.headers.cookie || "";
+    const match = cookieHeader.match(/(?:^|;\s*)cid=([^;]+)/);
+    let cid = match ? decodeURIComponent(match[1]) : crypto.randomUUID();
+
+    if (!match) {
+      res.setHeader(
+        "Set-Cookie",
+        `${cookieName}=${encodeURIComponent(cid)}; Path=/; Max-Age=31536000; SameSite=Lax`
+      );
+    }
+
+    const customer = await getOrCreateCustomer(cid);
+
+    // ---- RATE LIMIT (10 minutes) ----
+    const last = customer.last_scan_at
+      ? new Date(customer.last_scan_at).getTime()
+      : 0;
+
+    if (Date.now() - last < 10 * 60 * 1000) {
+      return res.send(`
+        <html>
+          <body style="font-family:system-ui;padding:24px">
+            <h2>☕ Already scanned</h2>
+            <p>Please wait a few minutes before scanning again.</p>
+          </body>
+        </html>
       `);
     }
 
-    console.log("[scan] app_secret set:", !!APP_SECRET);
-    console.log("[scan] d length:", String(d).length);
+    // ---- LOYALTY LOGIC ----
+    let { stamp_count, free_available } = customer;
 
-    let decoded;
-    try {
-      decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
-    } catch (e) {
-      console.log("[scan] decode failed:", e?.message);
-      return res.status(400).send("bad payload");
+    if (stamp_count >= 5) {
+      stamp_count = 0;
+      free_available += 1;
+    } else {
+      stamp_count += 1;
     }
 
-    const parts = decoded.split("|");
-    console.log("[scan] parts:", parts.length);
+    await pool.query(
+      `UPDATE customers
+       SET stamp_count=$1, free_available=$2, last_scan_at=now()
+       WHERE id=$3`,
+      [stamp_count, free_available, cid]
+    );
 
-    if (parts.length !== 3) {
-      console.log("[scan] decoded preview:", decoded.slice(0, 120));
-      return res.status(400).send("bad payload");
-    }
+    await pool.query(
+      `INSERT INTO scans (customer_id, store_id)
+       VALUES ($1, $2)`,
+      [cid, storeId]
+    );
 
-    const [storeId, ts, sig] = parts;
-
-    const base = `${storeId}|${ts}`;
-    const expected = hmac(base);
-
-    const ok = sig === expected;
-    console.log("[scan] sig match:", ok);
-
-    if (!ok) return res.status(401).send("invalid signature");
-
-    return res.send("OK");
+    // ---- CUSTOMER UI ----
+    return res.send(`
+      <html>
+        <head>
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Stamp added</title>
+          <style>
+            body { font-family: system-ui; padding: 24px; background:#fafafa; }
+            .card {
+              max-width:520px;
+              margin:0 auto;
+              background:#fff;
+              padding:20px;
+              border-radius:16px;
+              box-shadow:0 6px 24px rgba(0,0,0,.08);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <h2>✅ Stamp added</h2>
+            <p>Stamps: <b>${stamp_count}</b> / 5</p>
+            <p>Free drinks available: <b>${free_available}</b></p>
+          </div>
+        </body>
+      </html>
+    `);
   } catch (err) {
-    console.error("[scan] exception:", err);
-    return res.status(400).send("bad payload");
+    console.error("scan error:", err);
+    return res.status(400).send("Scan failed");
   }
 });
-
 
 /**
  * (Optional) keep POST /api/scan if you want a future in-app scanner.
