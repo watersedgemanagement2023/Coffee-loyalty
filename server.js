@@ -170,6 +170,25 @@ app.post("/api/scan", async (req, res) => {
   res.json({ customer: updated });
 });
 
+// Customer "me" (cookie-based) status
+app.get("/api/me", async (req, res) => {
+  const cookieName = "cid";
+  const cookieHeader = req.headers.cookie || "";
+  const match = cookieHeader.match(/(?:^|;\s*)cid=([^;]+)/);
+  let cid = match ? decodeURIComponent(match[1]) : crypto.randomUUID();
+
+  // If new, set cookie (1 year)
+  if (!match) {
+    res.setHeader(
+      "Set-Cookie",
+      `${cookieName}=${encodeURIComponent(cid)}; Path=/; Max-Age=31536000; SameSite=Lax`
+    );
+  }
+
+  const customer = await getOrCreateCustomer(cid);
+  res.json({ customer });
+});
+
 app.listen(PORT, () => {
   console.log("Server running on port", PORT);
 });
