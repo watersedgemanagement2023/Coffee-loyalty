@@ -40,7 +40,7 @@ app.get("/api/admin/qr", async (req, res) => {
   const d = Buffer.from(`${base}|${sig}`, "utf8").toString("base64url");
 
 const baseUrl = process.env.PUBLIC_BASE_URL || "https://coffee-loyalty.onrender.com";
-const url = `${baseUrl}/scan?d=${encodeURIComponent(d)}`;
+const url = `${baseUrl}/scan/${d}`;
 
 console.log("QR URL:", url); // TEMP DEBUG ✅
 
@@ -65,19 +65,19 @@ app.get("/api/customer/:id", async (req, res) => {
 /**
  * Camera-scan endpoint: customer scans QR -> browser opens -> stamp added
  */
-app.get("/scan", async (req, res) => {
+app.get("/scan/:d", async (req, res) => {
   try {
-    const d = req.query.d;
-    if (!d) {
-  return res.status(400).send(`
-    <html><body style="font-family:system-ui;padding:24px">
-      <h2>Scan Failed</h2>
-      <p>Please scan the QR code again.</p>
-      <p>The Team At Waters Edge Thanks You<p>
-    </body></html>
-  `);
-}
+    const d = req.params.d;
 
+    if (!d) {
+      return res.status(400).send(`
+        <html><body style="font-family:system-ui;padding:24px">
+          <h2>Scan Failed</h2>
+          <p>Please scan the QR code again.</p>
+          <p>The Team at Waters Edge thanks you.</p>
+        </body></html>
+      `);
+    }
 
     console.log("[scan] app_secret set:", !!APP_SECRET);
     console.log("[scan] d length:", String(d).length);
@@ -114,6 +114,7 @@ app.get("/scan", async (req, res) => {
     return res.status(400).send("bad payload");
   }
 });
+
 
 /**
  * (Optional) keep POST /api/scan if you want a future in-app scanner.
