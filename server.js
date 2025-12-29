@@ -135,38 +135,71 @@ app.get("/scan/:d", async (req, res) => {
       [cid, storeId]
     );
 
-    // ---- CUSTOMER UI ----
-    return res.send(`
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          <title>Stamp added</title>
-          <style>
-            body { font-family: system-ui; padding: 24px; background:#fafafa; }
-            .card {
-              max-width:520px;
-              margin:0 auto;
-              background:#fff;
-              padding:20px;
-              border-radius:16px;
-              box-shadow:0 6px 24px rgba(0,0,0,.08);
-            }
-          </style>
-        </head>
-        <body>
-          <div class="card">
-            <h2>✅ Stamp added</h2>
-            <p>Stamps: <b>${stamp_count}</b> / 5</p>
-            <p>Free drinks available: <b>${free_available}</b></p>
-          </div>
-        </body>
-      </html>
-    `);
-  } catch (err) {
-    console.error("scan error:", err);
-    return res.status(400).send("Scan failed");
-  }
-});
+// ---- CUSTOMER UI ----
+const totalStamps = 5;
+const filled = stamp_count;
+const empty = totalStamps - filled;
+
+const cups =
+  "☕".repeat(filled) +
+  "<span class='empty'>" + "☕".repeat(empty) + "</span>";
+
+return res.send(`
+  <html>
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Loyalty Stamp</title>
+      <style>
+        body {
+          font-family: system-ui;
+          padding: 24px;
+          background: #fafafa;
+        }
+        .card {
+          max-width: 520px;
+          margin: 0 auto;
+          background: #fff;
+          padding: 24px;
+          border-radius: 18px;
+          box-shadow: 0 6px 24px rgba(0,0,0,.08);
+          text-align: center;
+        }
+        .cups {
+          font-size: 32px;
+          letter-spacing: 6px;
+          margin: 16px 0;
+        }
+        .empty {
+          opacity: 0.2;
+        }
+        .reward {
+          margin-top: 16px;
+          padding: 14px;
+          border-radius: 12px;
+          background: #111;
+          color: #fff;
+          font-weight: 600;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="card">
+        <h2>✅ Stamp added</h2>
+
+        <div class="cups">${cups}</div>
+
+        <p>${stamp_count} of ${totalStamps} coffees collected</p>
+
+        ${
+          free_available > 0
+            ? `<div class="reward">🎉 Free drink available!</div>`
+            : `<p>Only ${totalStamps - stamp_count} more to go ☕</p>`
+        }
+      </div>
+    </body>
+  </html>
+`);
+
 
 /**
  * (Optional) keep POST /api/scan if you want a future in-app scanner.
