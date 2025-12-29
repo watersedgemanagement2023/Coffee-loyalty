@@ -85,6 +85,29 @@
     }
 
     refresh();
+    <button id="redeemBtn" style="display:none;margin-top:10px;background:#0f766e;">
+  Redeem free drink
+</button>
   </script>
+  async function redeem() {
+  const pin = prompt("Staff PIN:");
+  if (!pin) return;
+
+  const res = await fetch("/api/redeem", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ pin })
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    alert(data.error || "Redeem failed");
+    return;
+  }
+
+  alert("✅ Redeemed!");
+  refresh();
+}
 </body>
 </html>
