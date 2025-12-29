@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Coffee Loyalty</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; background:#fafafa; }
+    .card { max-width: 520px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 16px; box-shadow: 0 6px 24px rgba(0,0,0,.08); }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p { margin: 8px 0; line-height: 1.35; }
+    .row { display:flex; gap: 12px; margin-top: 14px; }
+    .pill { flex:1; padding: 14px; border-radius: 14px; background: #f3f4f6; text-align:center; }
+    .big { font-size: 28px; font-weight: 800; }
+    .label { opacity:.75; font-size: 13px; margin-top: 6px; }
+    .stamps { display:flex; gap:10px; justify-content:center; margin: 18px 0 8px; flex-wrap:wrap; }
+    .dot { width: 44px; height: 44px; border-radius: 999px; display:flex; align-items:center; justify-content:center; border:2px solid #111; }
+    .filled { background:#111; color:#fff; }
+    button { width:100%; padding: 14px 16px; font-size: 16px; border-radius: 12px; border: none; background:#111; color:#fff; margin-top: 14px; }
+    .muted { opacity: .75; font-size: 13px; margin-top: 10px; }
+    .ok { background:#e8fff1; padding:10px 12px; border-radius:12px; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>☕ Coffee Loyalty</h1>
+    <p>Buy a drink → ask staff to show the <b>Store QR</b> → scan it with your camera to add a stamp.</p>
+
+    <div class="row">
+      <div class="pill">
+        <div class="big" id="stampCount">—</div>
+        <div class="label">Stamps (out of 5)</div>
+      </div>
+      <div class="pill">
+        <div class="big" id="freeCount">—</div>
+        <div class="label">Free drinks</div>
+      </div>
+    </div>
+
+    <div class="stamps" id="stamps"></div>
+
+    <div class="ok" id="message" style="display:none;"></div>
+
+    <button onclick="refresh()">Refresh</button>
+    <div class="muted">
+      Tip: Save this page to your home screen so it feels like an app.
+    </div>
+  </div>
+
+  <script>
+    function renderStamps(n) {
+      const wrap = document.getElementById("stamps");
+      wrap.innerHTML = "";
+      for (let i = 1; i <= 5; i++) {
+        const d = document.createElement("div");
+        d.className = "dot" + (i <= n ? " filled" : "");
+        d.textContent = i <= n ? "✓" : "";
+        wrap.appendChild(d);
+      }
+    }
+
+    async function refresh() {
+      const msg = document.getElementById("message");
+      msg.style.display = "none";
+
+      const res = await fetch("/api/me", { credentials: "include" });
+      if (!res.ok) {
+        msg.style.display = "block";
+        msg.textContent = "Couldn’t load your loyalty status. Try again.";
+        return;
+      }
+
+      const data = await res.json();
+      const c = data.customer;
+
+      document.getElementById("stampCount").textContent = c.stamp_count;
+      document.getElementById("freeCount").textContent = c.free_available;
+      renderStamps(c.stamp_count);
+
+      msg.style.display = "block";
+      msg.textContent = "Status updated.";
+    }
+
+    refresh();
+  </script>
+</body>
+</html>
