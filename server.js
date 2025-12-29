@@ -71,8 +71,9 @@ app.get("/scan", async (req, res) => {
     if (!d) {
   return res.status(400).send(`
     <html><body style="font-family:system-ui;padding:24px">
-      <h2>Missing QR data</h2>
-      <p>Please scan the shop QR code again.</p>
+      <h2>Scan Failed</h2>
+      <p>Please scan the QR code again.</p>
+      <p>The Team At Waters Edge Thanks You<p>
     </body></html>
   `);
 }
