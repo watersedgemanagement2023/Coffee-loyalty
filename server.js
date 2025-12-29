@@ -86,25 +86,7 @@ app.get("/scan", async (req, res) => {
     console.error("scan error:", err);
     return res.status(400).send("bad payload");
   }
-
-  const [storeId, ts, sig] = payload.split("|");
-  if (!storeId || !ts || !sig) return res.status(400).send("Bad payload");
-
-  const base = `${storeId}|${ts}`;
-  if (hmac(base) !== sig) return res.status(401).send("Invalid QR");
-
-  // Customer id via cookie (same phone = same customer)
-  const cookieName = "cid";
-  const cookieHeader = req.headers.cookie || "";
-  const match = cookieHeader.match(/(?:^|;\s*)cid=([^;]+)/);
-  let cid = match ? decodeURIComponent(match[1]) : crypto.randomUUID();
-
-  if (!match) {
-    res.setHeader(
-      "Set-Cookie",
-      `${cookieName}=${encodeURIComponent(cid)}; Path=/; Max-Age=31536000; SameSite=Lax`
-    );
-  }
+});
 
   const customer = await getOrCreateCustomer(cid);
 
