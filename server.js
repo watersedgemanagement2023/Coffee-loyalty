@@ -81,17 +81,10 @@ app.get("/scan", async (req, res) => {
 
     if (sig !== expected) return res.status(400).send("bad payload");
 
-    // ✅ payload verified
     return res.send("OK");
   } catch (err) {
     console.error("scan error:", err);
     return res.status(400).send("bad payload");
-  }
-});
-
-  }
-});
-
   }
 
   const [storeId, ts, sig] = payload.split("|");
