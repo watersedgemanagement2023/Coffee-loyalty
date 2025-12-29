@@ -68,40 +68,22 @@ app.get("/api/customer/:id", async (req, res) => {
 app.get("/scan", async (req, res) => {
   try {
     const d = req.query.d;
-    if (!d) {
-      console.log("[scan] missing d");
-      return res.status(400).send("bad payload");
-    }
+    if (!d) return res.status(400).send("bad payload");
 
-    let decoded;
-    try {
-      decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
-    } catch (e) {
-      console.log("[scan] base64url decode failed", e?.message);
-      return res.status(400).send("bad payload");
-    }
-
+    const decoded = Buffer.from(String(d).trim(), "base64url").toString("utf8");
     const parts = decoded.split("|");
-    if (parts.length !== 3) {
-      console.log("[scan] wrong parts count", parts.length, decoded.slice(0, 120));
-      return res.status(400).send("bad payload");
-    }
+    if (parts.length !== 3) return res.status(400).send("bad payload");
 
     const [storeId, ts, sig] = parts;
     const base = `${storeId}|${ts}`;
     const expected = hmac(base);
 
-    const match = sig === expected;
+    if (sig !== expected) return res.status(400).send("bad payload");
 
-    console.log("[scan] decoded:", decoded);
-    console.log("[scan] base:", base);
-    console.log("[scan] sig match:", match);
-
-    if (!match) return res.status(400).send("bad payload");
-
+    // ✅ payload verified
     return res.send("OK");
   } catch (err) {
-    console.log("[scan] exception", err);
+    console.error("scan error:", err);
     return res.status(400).send("bad payload");
   }
 });
