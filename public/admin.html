@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>QR Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui;
+      padding: 24px;
+      background: #fafafa;
+    }
+    .card {
+      max-width: 520px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.08);
+      text-align: center;
+    }
+    img {
+      width: 100%;
+      max-width: 320px;
+      margin: 16px auto;
+    }
+    button {
+      margin-top: 12px;
+      padding: 14px 18px;
+      font-size: 16px;
+      border-radius: 12px;
+      border: none;
+      background: #111;
+      color: #fff;
+      cursor: pointer;
+    }
+    .url {
+      word-break: break-all;
+      font-size: 12px;
+      margin-top: 12px;
+      opacity: .7;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>☕ Loyalty QR</h2>
+    <p>Scan this at the counter</p>
+
+    <img id="qr" alt="QR code loading…" />
+
+    <div class="url" id="url"></div>
+
+    <button onclick="window.print()">Print QR</button>
+  </div>
+
+  <script>
+    const ADMIN_KEY = prompt("Enter admin key:");
+
+    fetch(`/api/admin/qr?key=${encodeURIComponent(ADMIN_KEY)}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Invalid admin key");
+        return res.json();
+      })
+      .then(data => {
+        document.getElementById("qr").src = data.qr_data_url;
+        document.getElementById("url").textContent = data.url;
+      })
+      .catch(err => {
+        alert(err.message);
+      });
+  </script>
+</body>
+</html>
