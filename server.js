@@ -242,7 +242,7 @@ app.get("/scan/:d", async (req, res) => {
   // Redirect after 5 seconds
   setTimeout(() => {
     window.location.href = "/";
-  }, 5000);
+  }, 10000);
 </script>
 
           </script>
