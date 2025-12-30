@@ -254,7 +254,10 @@ if (stamp_count >= 5) {
 
   // Only fire confetti if a free drink is available
   const hasFree = ${earnedReward ? "true" : "false"};
+  window.addEventListener("load", () => {
   if (hasFree) launchConfetti();
+});
+
 
   // Redirect after 5 seconds
   setTimeout(() => {
