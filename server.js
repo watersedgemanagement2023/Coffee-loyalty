@@ -307,7 +307,7 @@ window.addEventListener("load", () => {
             ${
               free_available > 0
                 ? `<div class="reward">🎉 Free drink available!</div>`
-                : `<p>Only ${totalStamps - stamp_count} more to go ☕</p>`
+              
             }
           </div>
         </body>
