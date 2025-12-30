@@ -198,7 +198,8 @@ return res.send(`
       </div>
     </body>
   </html>
-`);
+`
+}); 
 
 
 /**
