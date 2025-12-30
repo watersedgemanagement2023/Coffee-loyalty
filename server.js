@@ -221,7 +221,7 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
   font-weight: 600;
 }
 .logo {
-  animation: fadeIn 1.2s ease-out;
+  animation: fadeIn 2.5s ease-out;
 }
 
 @keyframes fadeIn {
