@@ -111,12 +111,16 @@ app.get("/scan/:d", async (req, res) => {
 
     // Loyalty logic (5 stamps = 1 free)
     let { stamp_count, free_available } = customer;
-    if (stamp_count >= 5) {
-      stamp_count = 0;
-      free_available += 1;
-    } else {
-      stamp_count += 1;
-    }
+    let earnedReward = false;
+
+if (stamp_count >= 5) {
+  stamp_count = 0;
+  free_available += 1;
+  earnedReward = true; // 🎉 THIS IS THE KEY
+} else {
+  stamp_count += 1;
+}
+
 
     await pool.query(
       `UPDATE customers
@@ -201,6 +205,17 @@ app.get("/scan/:d", async (req, res) => {
   margin: 0 auto 12px;
   display: block;
 }
+.redeem {
+  margin-top: 14px;
+  padding: 14px;
+  width: 100%;
+  border-radius: 12px;
+  border: none;
+  background: #0b5;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+}
 
           </style>
           <script>
@@ -235,13 +250,32 @@ app.get("/scan/:d", async (req, res) => {
   }
 
   // Only fire confetti if a free drink is available
-  const hasFree = ${free_available > 0 ? "true" : "false"};
+  const hasFree = ${earnedReward ? "true" : "false"};
   if (hasFree) launchConfetti();
 
   // Redirect after 5 seconds
   setTimeout(() => {
     window.location.href = "/";
   }, 10000);
+  
+  async function redeem() {
+  const pin = prompt("Staff PIN");
+  if (!pin) return;
+
+  const res = await fetch("/api/redeem", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pin })
+  });
+
+  if (res.ok) {
+    alert("Redeemed successfully ☕");
+    location.reload();
+  } else {
+    alert("Invalid PIN");
+  }
+}
+
           </script>
         </head>
         <body>
@@ -261,6 +295,15 @@ app.get("/scan/:d", async (req, res) => {
           </div>
         </body>
       </html>
+      ${
+  free_available > 0
+    ? `
+      <div class="reward">🎉 Free drink available!</div>
+      <button class="redeem" onclick="redeem()">Redeem</button>
+    `
+    : `<p>Only ${totalStamps - stamp_count} more to go ☕</p>`
+}
+
     `);
   } catch (err) {
     console.error("scan error:", err);
