@@ -202,11 +202,12 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
               color: #fff;
               font-weight: 600;
             }
-    .logo {
-  width: 240px;       /* 👈 increase this */
-  max-width: 90%;     /* keeps it safe on small phones */
+.logo {
+  width: 280px;
+  max-width: 90%;
   margin: 0 auto 16px;
   display: block;
+  animation: fadeIn 2.5s ease-out;
 }
 
 .redeem {
@@ -219,9 +220,6 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
   color: #fff;
   font-size: 16px;
   font-weight: 600;
-}
-.logo {
-  animation: fadeIn 2.5s ease-out;
 }
 
 @keyframes fadeIn {
