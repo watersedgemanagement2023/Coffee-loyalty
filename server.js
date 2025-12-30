@@ -197,6 +197,12 @@ app.get("/scan/:d", async (req, res) => {
               color: #fff;
               font-weight: 600;
             }
+            .logo {
+  max-width: 140px;
+  margin: 0 auto 12px;
+  display: block;
+}
+
           </style>
           <script>
   function launchConfetti() {
@@ -243,6 +249,7 @@ app.get("/scan/:d", async (req, res) => {
         </head>
         <body>
           <div class="card">
+          <img src="/logo.png" alt="Waters Edge" class="logo" />
             <h2>✅ Stamp added</h2>
 
             <div class="cups">${cups}</div>
