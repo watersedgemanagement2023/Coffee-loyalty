@@ -251,7 +251,6 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
   const earned = ${earnedReward ? "true" : "false"};
 window.addEventListener("load", () => {
   if (earned) launchConfetti();
-});
 
   });
 
