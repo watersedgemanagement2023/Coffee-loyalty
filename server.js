@@ -113,17 +113,16 @@ if (!isTest && Date.now() - last < 10 * 60 * 1000) {
     }
 
     // Loyalty logic (5 stamps = 1 free)
-    let { stamp_count, free_available } = customer;
-    let earnedReward = false;
+let { stamp_count, free_available } = customer;
+let earnedReward = false;
 
-if (stamp_count >= 5) {
+if (stamp_count >= 4) {        // ✅ reward on 5th scan
   stamp_count = 0;
   free_available += 1;
-  earnedReward = true; // 🎉 THIS IS THE KEY
+  earnedReward = true;
 } else {
   stamp_count += 1;
 }
-
 
     await pool.query(
       `UPDATE customers
@@ -260,10 +259,12 @@ if (stamp_count >= 5) {
 
 
   // Redirect after 5 seconds
+  if (!hasFree) {
   setTimeout(() => {
     window.location.href = "/";
-  }, 10000);
-  
+  }, 5000);
+}
+
   async function redeem() {
   const pin = prompt("Staff PIN");
   if (!pin) return;
