@@ -181,6 +181,11 @@ return res.send(`
           font-weight: 600;
         }
       </style>
+      <script>
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 3000);
+      </script>
     </head>
     <body>
       <div class="card">
@@ -198,8 +203,9 @@ return res.send(`
       </div>
     </body>
   </html>
-`
-}); 
+`);
+
+
 
 
 /**
