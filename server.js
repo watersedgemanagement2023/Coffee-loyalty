@@ -165,7 +165,6 @@ app.get("/scan/:d", async (req, res) => {
       transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot));
     }
   }
-</style>
 
             body {
               font-family: system-ui;
@@ -243,8 +242,6 @@ app.get("/scan/:d", async (req, res) => {
   setTimeout(() => {
     window.location.href = "/";
   }, 10000);
-</script>
-
           </script>
         </head>
         <body>
