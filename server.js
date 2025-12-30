@@ -202,10 +202,13 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
               color: #fff;
               font-weight: 600;
             }
-            .logo {
-  max-width: 140px;
-  margin: 0 auto 12px;
+    .logo {
+  width: 220px;       /* 👈 increase this */
+  max-width: 80%;     /* keeps it safe on small phones */
+  margin: 0 auto 16px;
   display: block;
+}
+
 }
 .redeem {
   margin-top: 14px;
@@ -217,6 +220,20 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
   color: #fff;
   font-size: 16px;
   font-weight: 600;
+}
+.logo {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
           </style>
