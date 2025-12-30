@@ -220,14 +220,13 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
 }
 
           </style>
-          <script>
+<script>
   function launchConfetti() {
     const count = 80;
 
     for (let i = 0; i < count; i++) {
       const piece = document.createElement("div");
       piece.className = "confetti";
-
       piece.style.left = Math.random() * 100 + "vw";
 
       const w = 6 + Math.random() * 8;
@@ -240,50 +239,47 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
 
       const ms = 1200 + Math.random() * 1400;
       piece.style.animationDuration = ms + "ms";
-      piece.style.animationDelay = (Math.random() * 200) + "ms";
-
-      piece.style.setProperty("--dx", (Math.random() * 60 - 30) + "vw");
-      piece.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
+      piece.style.animationDelay = Math.random() * 200 + "ms";
+      piece.style.setProperty("--dx", Math.random() * 60 - 30 + "vw");
+      piece.style.setProperty("--rot", Math.random() * 720 - 360 + "deg");
 
       document.body.appendChild(piece);
-
       setTimeout(() => piece.remove(), ms + 500);
     }
   }
 
-  // Only fire confetti if a free drink is available
-  const hasFree = ${earnedReward ? "true" : "false"};
+  const earned = ${earnedReward ? "true" : "false"};
+
   window.addEventListener("load", () => {
-  if (hasFree) launchConfetti();
-});
-
-
-  // Redirect after 5 seconds
-  if (!hasFree) {
-  setTimeout(() => {
-    window.location.href = "/";
-  }, 5000);
-}
-
-  async function redeem() {
-  const pin = prompt("Staff PIN");
-  if (!pin) return;
-
-  const res = await fetch("/api/redeem", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pin })
+    if (earned) launchConfetti();
   });
 
-  if (res.ok) {
-    alert("Redeemed successfully ☕");
-    location.reload();
-  } else {
-    alert("Invalid PIN");
+  // Redirect only if NOT earning a reward
+  if (!earned) {
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 10000);
   }
-}
 
-          </script>
+  async function redeem() {
+    const pin = prompt("Staff PIN");
+    if (!pin) return;
+
+    const res = await fetch("/api/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pin })
+    });
+
+    if (res.ok) {
+      alert("Redeemed successfully ☕");
+      location.reload();
+    } else {
+      alert("Invalid PIN");
+    }
+  }
+</script>
+
         </head>
         <body>
           <div class="card">
