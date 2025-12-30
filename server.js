@@ -206,7 +206,7 @@ app.get("/scan/:d", async (req, res) => {
   }
 });
   
- * (Optional) keep POST /api/scan if you want a future in-app scanner.
+/** (Optional) keep POST /api/scan if you want a future in-app scanner.
  * You can delete this later; it doesn't break anything.
  */
 app.post("/api/scan", async (req, res) => {
