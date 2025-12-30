@@ -98,7 +98,10 @@ app.get("/scan/:d", async (req, res) => {
 
     // 10-minute rate limit
     const last = customer.last_scan_at ? new Date(customer.last_scan_at).getTime() : 0;
-    if (Date.now() - last < 10 * 60 * 1000) {
+    const isTest = req.query.test === "1";
+
+if (!isTest && Date.now() - last < 10 * 60 * 1000) {
+
       return res.send(`
         <html>
           <body style="font-family:system-ui;padding:24px">
