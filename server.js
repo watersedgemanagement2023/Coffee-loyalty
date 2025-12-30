@@ -163,7 +163,7 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
     opacity: 0.9;
     pointer-events: none;
     z-index: 9999;
-    animation: confetti-fall linear forwards;
+   animation: confetti-fall 1.8s linear forwards;
   }
 
   @keyframes confetti-fall {
@@ -249,9 +249,10 @@ if (stamp_count >= 4) {        // ✅ reward on 5th scan
   }
 
   const earned = ${earnedReward ? "true" : "false"};
+window.addEventListener("load", () => {
+  if (earned) launchConfetti();
+});
 
-  window.addEventListener("load", () => {
-    if (earned) launchConfetti();
   });
 
   // Redirect only if NOT earning a reward
