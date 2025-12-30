@@ -146,6 +146,27 @@ app.get("/scan/:d", async (req, res) => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>Loyalty Stamp</title>
           <style>
+  /* ...your existing styles... */
+
+  .confetti {
+    position: fixed;
+    top: -10px;
+    width: 10px;
+    height: 14px;
+    border-radius: 2px;
+    opacity: 0.9;
+    pointer-events: none;
+    z-index: 9999;
+    animation: confetti-fall linear forwards;
+  }
+
+  @keyframes confetti-fall {
+    to {
+      transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot));
+    }
+  }
+</style>
+
             body {
               font-family: system-ui;
               padding: 24px;
@@ -178,9 +199,46 @@ app.get("/scan/:d", async (req, res) => {
             }
           </style>
           <script>
-            setTimeout(() => {
-              window.location.href = "/";
-            }, 5000);
+  function launchConfetti() {
+    const count = 80;
+
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement("div");
+      piece.className = "confetti";
+
+      piece.style.left = Math.random() * 100 + "vw";
+
+      const w = 6 + Math.random() * 8;
+      const h = 10 + Math.random() * 10;
+      piece.style.width = w + "px";
+      piece.style.height = h + "px";
+
+      const colors = ["#111", "#ff4d4d", "#ffd166", "#06d6a0", "#4d96ff", "#b5179e"];
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+      const ms = 1200 + Math.random() * 1400;
+      piece.style.animationDuration = ms + "ms";
+      piece.style.animationDelay = (Math.random() * 200) + "ms";
+
+      piece.style.setProperty("--dx", (Math.random() * 60 - 30) + "vw");
+      piece.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
+
+      document.body.appendChild(piece);
+
+      setTimeout(() => piece.remove(), ms + 500);
+    }
+  }
+
+  // Only fire confetti if a free drink is available
+  const hasFree = ${free_available > 0 ? "true" : "false"};
+  if (hasFree) launchConfetti();
+
+  // Redirect after 5 seconds
+  setTimeout(() => {
+    window.location.href = "/";
+  }, 5000);
+</script>
+
           </script>
         </head>
         <body>
